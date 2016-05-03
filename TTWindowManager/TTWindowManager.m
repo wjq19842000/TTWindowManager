@@ -328,6 +328,42 @@ typedef enum {
 }
 
 - (void)modalIncomingWindow:(TTWindow*)incomingWindow andOutgoingWindow:(UIWindow*)outgoingWindow withDirection:(TTAnimationDirection)direction completion:(TTWindowBOOLCompletion)completion {
+    
+    CGRect finalFrame = incomingWindow.frame;
+    CGRect dismissedFrame = incomingWindow.bounds;
+    dismissedFrame.origin.y = dismissedFrame.size.height;
+    
+    if (direction == TTAnimationDirectionPush) {
+        incomingWindow.frame = dismissedFrame;
+        [incomingWindow setHidden:NO];
+    }
+    
+    [UIView animateKeyframesWithDuration:0.3 delay:0.0 options:UIViewKeyframeAnimationOptionCalculationModeCubicPaced animations:^{
+
+        if (direction == TTAnimationDirectionPush) {
+
+            [UIView addKeyframeWithRelativeStartTime:0.0 relativeDuration:1.0 animations:^{
+                incomingWindow.frame = finalFrame;
+            }];
+        } else if (direction == TTAnimationDirectionPop) {
+
+            [UIView addKeyframeWithRelativeStartTime:0.0 relativeDuration:1.0 animations:^{
+                incomingWindow.frame = dismissedFrame;
+            }];
+        }
+    } completion:^(BOOL finished) {
+
+        if (direction == TTAnimationDirectionPop) {
+
+            incomingWindow.frame = finalFrame;
+        }
+
+        [self normalizeIncomingWindow:incomingWindow andOutgoingWindow:outgoingWindow withDirection:direction completion:completion];
+    }];
+}
+
+#if 0
+- (void)modalIncomingWindow:(TTWindow*)incomingWindow andOutgoingWindow:(UIWindow*)outgoingWindow withDirection:(TTAnimationDirection)direction completion:(TTWindowBOOLCompletion)completion {
     [self displayBackgroundAnimationWindow];
     
     CGRect finalFrame = incomingWindow.frame;
@@ -373,6 +409,7 @@ typedef enum {
         [self hideBackgroundAnimationWindow];
     }];
 }
+#endif
 
 - (void)scaleDownIncomingWindow:(TTWindow*)incomingWindow andOutgoingWindow:(UIWindow*)outgoingWindow withDirection:(TTAnimationDirection)direction completion:(TTWindowBOOLCompletion)completion {
     
